@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">CoinFlip</string>
+    <string name="app_name_long">CoinFlip (Testnet)</string>
+
+    <string name="nav_play">Play CoinFlip</string>
+    <string name="nav_account">Account Details</string>
+
+    <string name="login_button_create">Create Account*</string>
+    <string name="login_button_restore">Restore Account*</string>
+    <string name="login_guest_message">Create or import a wallet to start playing CoinFlip</string>
+    <string name="login_guest_coin_description">Algorand Coin</string>
+    <string name="login_restore_textifield_title">Mnemomic / Passphrase</string>
+    <string name="login_restore_textfield_value">Enter 25 words here</string>
+    <string name="login_disclaimer">*This app is for demo purposes only.</string>
+
+    <string name="account_header">Account Information</string>
+    <string name="account_address">Public Key Address</string>
+    <string name="account_passphrase">Mnemomic / Passphrase</string>
+    <string name="account_button_lock">Lock Wallet</string>
+
+    <string name="play_button_opt_in">App Opt In</string>
+    <string name="play_button_close_out">Close Out App</string>
+    <string name="play_button_wait_message">It will take a few seconds for the new state to be recognized on the blockchain</string>
+    <string name="play_button_submit_bet">Bet submitted.  It will take a few seconds for the new state to be recognized on the blockchain</string>
+    <string name="play_button_settle_wait">It will take a few seconds for the bet to be settled on the blockchain</string>
+    <string name="play_button_flip_heads">Flip Coin Heads</string>
+    <string name="play_button_flip_tails">Flip Coin Tails</string>
+    <string name="play_button_pending">Pending&#8230;</string>
+    <string name="play_button_settle">Settle Bet</string>
+    <string name="play_title">Bet on the flip of a coin</string>
+    <string name="play_balance">Current Balance: </string>
+    <string name="play_current_round">Current Round: </string>
+    <string name="play_waiting_round">Waiting Round: </string>
+    <string name="play_balance_low">Balance too low to play CoinFlip, add some money from Testnet Dispenser</string>
+    <string name="play_game_header">Wager: Bet 50000 mAlgos on</string>
+    <string name="play_game_instructions">Click on a coin to pick a side and flip! \n(heads on left, tails on right)</string>
+
+    <string name="error_account_create">Could not create new wallet</string>
+    <string name="error_account_restore">Could not recover wallet from passphrase</string>
+    <string name="error_account_flipcoin">Could not submit on chain.  Please check logs</string>
+    <string name="error_account_settle">Could not settle bet on chain.  Please check logs for issue</string>
+
+</resources>

@@ -52,3 +52,9 @@ $ yarn run dev
 ```
 
 Log in with a funded testnet account and go through the steps to create, opt in, flip, settle
+
+### Android
+
+To run the the demo in an Android emulator, cd into the `android` directory and load up the project in Android Studio.
+
+Log in with a funded testnet account and go through the steps to opt in, flip, and settle.
