@@ -20,7 +20,7 @@ class CoinFlipper(Application):
     ###
     beacon_app_id: Final[ApplicationStateValue] = ApplicationStateValue(
         TealType.uint64,
-        default=Int(110096026),
+        default=Int(600011887),
         descr="The App ID of the randomness beacon. Should adhere to ARC-21",
     )
     min_bet: Final[ApplicationStateValue] = ApplicationStateValue(

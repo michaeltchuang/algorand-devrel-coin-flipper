@@ -170,7 +170,7 @@ return
 // create
 create_0:
 bytec_3 // "beacon_app_id"
-pushint 110096026 // 110096026
+pushint 600011887 // 600011887
 app_global_put
 bytec_0 // "bets_outstanding"
 intc_0 // 0
