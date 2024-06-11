@@ -12,9 +12,14 @@ import org.junit.Test
  */
 class UnitTests {
     val respository = AlgorandRepository()
+
     @Test
     fun restoreAccount() {
-        val result = respository.recoverAccount(Constants.TEST_PASSPHRASE)
+        val result =
+            respository.recoverAccount(
+                Constants.TEST_PASSPHRASE_PART1 +
+                    " " + Constants.TEST_PASSPHRASE_PART2,
+            )
         assertEquals(Constants.TEST_ADDRESS, result?.address?.toString())
     }
 }

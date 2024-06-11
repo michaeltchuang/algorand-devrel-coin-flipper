@@ -11,7 +11,9 @@ import kotlinx.coroutines.launch
 import com.algorand.algosdk.v2.client.model.Account as AccountInfo
 
 open class BaseViewModel : ViewModel() {
-    open val TAG = "BaseViewModel"
+    companion object {
+        const val TAG = "BaseViewModel"
+    }
 
     val accountLiveData = MutableLiveData<Account?>()
     val appOptInStateLiveData = MutableLiveData<Boolean>()
@@ -22,9 +24,13 @@ open class BaseViewModel : ViewModel() {
 
     val repository: AlgorandRepository = AlgorandRepository()
 
-    fun recoverAccount(passphrase : String?, appOptInStateCheck: Boolean) {
-        if (passphrase == null)
+    fun recoverAccount(
+        passphrase: String?,
+        appOptInStateCheck: Boolean,
+    ) {
+        if (passphrase == null) {
             accountLiveData.value = null
+        }
 
         passphrase?.apply {
             viewModelScope.launch {
@@ -34,22 +40,26 @@ open class BaseViewModel : ViewModel() {
                     account = r
                     accountInfo = r.let { repository.getAccountInfo(it) }
 
-                    //auto opt into app if account exists
-                    if (appOptInStateCheck)
+                    // auto opt into app if account exists
+                    if (appOptInStateCheck) {
                         appOptInStateCheck(r, Constants.COINFLIP_APP_ID_TESTNET)
+                    }
                 }
             }
         }
     }
 
-    fun appOptInStateCheck(account: Account, appId: Long) {
+    fun appOptInStateCheck(
+        account: Account,
+        appId: Long,
+    ) {
         viewModelScope.launch {
             try {
                 var optInAlready = false
                 hasExistingBet = false
                 val accountInfo = repository.getAccountInfo(account)
 
-                //skip if opt in already
+                // skip if opt in already
                 accountInfo?.appsLocalState?.forEach {
                     if (it.id == appId) {
                         Log.d(TAG, String.format("Account has already opt in to app id: " + appId))
@@ -59,7 +69,7 @@ open class BaseViewModel : ViewModel() {
                         }
                     }
                 }
-                Log.d(TAG, "account app (${appId}) - opt in state(${optInAlready}), has existing bet(${hasExistingBet})")
+                Log.d(TAG, "account app ($appId) - opt in state($optInAlready), has existing bet($hasExistingBet)")
                 appOptInStateLiveData.value = optInAlready
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
@@ -67,24 +77,32 @@ open class BaseViewModel : ViewModel() {
         }
     }
 
-    fun appOptIn(account: Account, appId: Long) {
+    fun appOptIn(
+        account: Account,
+        appId: Long,
+    ) {
         viewModelScope.launch {
             try {
                 val res = repository.appOptIn(account, appId)
-                if(res?.confirmedRound != null)
+                if (res?.confirmedRound != null) {
                     appOptInStateCheck(account, appId)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
             }
         }
     }
 
-    fun closeOutApp(account: Account, appId: Long) {
+    fun closeOutApp(
+        account: Account,
+        appId: Long,
+    ) {
         viewModelScope.launch {
             try {
                 val res = repository.closeOutApp(account, appId)
-                if(res?.confirmedRound != null)
+                if (res?.confirmedRound != null) {
                     appOptInStateCheck(account, appId)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
             }

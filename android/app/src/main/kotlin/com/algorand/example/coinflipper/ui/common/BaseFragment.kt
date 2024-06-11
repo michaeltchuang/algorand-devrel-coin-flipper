@@ -18,9 +18,12 @@ import androidx.fragment.app.Fragment
 import com.algorand.example.coinflipper.R
 
 open class BaseFragment : Fragment() {
-
+    @Suppress("ComposableNaming")
     @Composable
-    fun AlgorandFragmentButton(resourceId: Int, stringResourceId: Int) {
+    fun algorandFragmentButton(
+        resourceId: Int,
+        stringResourceId: Int,
+    ) {
         Button(
             onClick = {
                 if (onClick(resourceId)) {
@@ -31,19 +34,20 @@ open class BaseFragment : Fragment() {
             },
             colors = ButtonDefaults.buttonColors(colorResource(R.color.teal_700)),
             shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .width(190.dp)
-                .height(50.dp)
-
-        )
-        {
+            modifier =
+                Modifier
+                    .width(190.dp)
+                    .height(50.dp),
+        ) {
             Text(
                 stringResource(stringResourceId),
                 style = MaterialTheme.typography.button,
-                color = Color.White
+                color = Color.White,
             )
         }
     }
 
-    open fun onClick(resourceId: Int): Boolean { return true }
+    open fun onClick(resourceId: Int): Boolean {
+        return true
+    }
 }

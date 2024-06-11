@@ -1,5 +1,6 @@
 package com.algorand.example.coinflipper.ui.play
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
@@ -50,72 +51,85 @@ import com.algorand.example.coinflipper.ui.MainActivity
 import com.algorand.example.coinflipper.ui.common.BaseFragment
 import com.algorand.example.coinflipper.utils.Constants
 
-
 class PlayFragment : BaseFragment() {
-    private val TAG: String = "PlayFragment"
+    companion object {
+        private const val TAG: String = "PlayFragment"
+    }
+
     private lateinit var playViewModel: PlayViewModel
     private lateinit var binding: FragmentPlayBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         (activity as MainActivity).actionBar?.title = getString(R.string.app_name_long)
 
-        binding = DataBindingUtil.inflate<FragmentPlayBinding>(
-            inflater,
-            R.layout.fragment_play,
-            container,
-            false
-        )
-            .apply {
-                composeFragmentPlay.setContent {
-                    PlayFragmentComposable()
+        binding =
+            DataBindingUtil.inflate<FragmentPlayBinding>(
+                inflater,
+                R.layout.fragment_play,
+                container,
+                false,
+            )
+                .apply {
+                    composeFragmentPlay.setContent {
+                        playFragmentComposable()
+                    }
                 }
-            }
 
         playViewModel = ViewModelProvider(this).get(PlayViewModel::class.java)
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         activity?.getIntent()?.getExtras()?.getString("passphrase")?.apply {
             playViewModel.recoverAccount(this, true)
             playViewModel.contract = getJsonDataFromAsset(
-                requireActivity(), "contract.json") ?: ""
+                requireActivity(), "contract.json",
+            ) ?: ""
         }
-        playViewModel.snackBarLiveData.observe(viewLifecycleOwner, Observer {
-            (activity as MainActivity).showSnackbar(it)
-        })
+        playViewModel.snackBarLiveData.observe(
+            viewLifecycleOwner,
+            Observer {
+                (activity as MainActivity).showSnackbar(it)
+            },
+        )
 
         val mainHandler = Handler(Looper.getMainLooper())
-        var refresh = Runnable() {}
-        refresh = Runnable {
-            if(playViewModel.hasExistingBet) {
-                playViewModel.hasExistingBetState()
+        var refresh = Runnable {}
+        refresh =
+            Runnable {
+                if (playViewModel.hasExistingBet) {
+                    playViewModel.hasExistingBetState()
+                }
+                mainHandler.postDelayed(refresh, 1000)
             }
-            mainHandler.postDelayed(refresh, 1000)
-        }
         mainHandler.postDelayed(refresh, 1000)
     }
 
+    @SuppressLint("ComposableNaming")
     @Composable
-    fun PlayFragmentComposable() {
+    fun playFragmentComposable() {
         val appOptInStateLiveData by playViewModel.appOptInStateLiveData.observeAsState()
         val appOptInState = appOptInStateLiveData
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
         ) {
             when (appOptInState) {
                 true -> {
-                    //Allowed to Play
+                    // Allowed to Play
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceBetween,
@@ -123,47 +137,51 @@ class PlayFragment : BaseFragment() {
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .height(400.dp)
-                                .fillMaxWidth()
+                            modifier =
+                                Modifier
+                                    .height(400.dp)
+                                    .fillMaxWidth(),
                         ) {
-                            CoinFlipGameComposable()
+                            coinFlipGameComposable()
                         }
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(150.dp),
                         ) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.SpaceEvenly,
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .fillMaxWidth(),
                             ) {
-                                (activity as MainActivity).AlgorandDivider()
-                                AlgorandFragmentButton(
+                                (activity as MainActivity).algorandDivider()
+                                algorandFragmentButton(
                                     resourceId = R.string.play_button_close_out,
-                                    stringResourceId = R.string.play_button_close_out
+                                    stringResourceId = R.string.play_button_close_out,
                                 )
                             }
                         }
                     }
                 }
                 false -> {
-                    //Not allowed to Play
+                    // Not allowed to Play
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceEvenly,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(),
+                        modifier =
+                            Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(),
                     ) {
-                        AlgorandFragmentButton(
+                        algorandFragmentButton(
                             resourceId = R.string.play_button_opt_in,
-                            stringResourceId = R.string.play_button_opt_in
+                            stringResourceId = R.string.play_button_opt_in,
                         )
                     }
                 }
@@ -172,183 +190,204 @@ class PlayFragment : BaseFragment() {
         }
     }
 
+    @Suppress("ComposableNaming")
     @Composable
-    fun CoinFlipGameComposable() {
+    fun coinFlipGameComposable() {
         val appGameStateLiveData by playViewModel.appGameStateLiveData.observeAsState()
         val appGameState = appGameStateLiveData
         when (appGameState) {
             PlayViewModel.GameState.BET -> {
-                //Bet Form
-                BetViewComposable()
+                // Bet Form
+                betViewComposable()
             }
             PlayViewModel.GameState.PENDING -> {
-                //Coin Flipping
-                PendingViewComposable()
+                // Coin Flipping
+                pendingViewComposable()
             }
             PlayViewModel.GameState.SETTLE -> {
-                //Settle bet
-                SettleViewComposable()
+                // Settle bet
+                settleViewComposable()
             }
             else -> {
-                //Default First View
+                // Default First View
                 if (playViewModel.hasExistingBet) {
                     playViewModel.hasExistingBetState()
                 } else {
-                    //Bet Form
-                    BetViewComposable()
+                    // Bet Form
+                    betViewComposable()
                 }
             }
         }
     }
 
+    @Suppress("ComposableNaming")
     @Composable
-    fun BetViewComposable() {
+    fun betViewComposable() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
         ) {
             Text(
                 stringResource(R.string.play_title),
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
-                style = TextStyle(
-                    fontSize = 24.sp
-                ),
+                style =
+                    TextStyle(
+                        fontSize = 24.sp,
+                    ),
                 fontFamily = FontFamily.SansSerif,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight()
+                modifier =
+                    Modifier
+                        .wrapContentWidth()
+                        .wrapContentHeight(),
             )
             playViewModel.accountInfo?.let {
                 Text(
                     stringResource(R.string.play_balance) + " ${it.amount} mAlgos",
                     color = Color.Black,
-                    style = TextStyle(
-                        fontSize = 16.sp
-                    ),
+                    style =
+                        TextStyle(
+                            fontSize = 16.sp,
+                        ),
                     fontFamily = FontFamily.SansSerif,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .wrapContentHeight()
+                    modifier =
+                        Modifier
+                            .wrapContentWidth()
+                            .wrapContentHeight(),
                 )
             }
-            (activity as MainActivity).AlgorandDivider()
+            (activity as MainActivity).algorandDivider()
             Text(
                 stringResource(R.string.play_game_header),
                 color = Color.Black,
-                style = TextStyle(
-                    fontSize = 16.sp
-                ),
+                style =
+                    TextStyle(
+                        fontSize = 16.sp,
+                    ),
                 fontFamily = FontFamily.SansSerif,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight()
+                modifier =
+                    Modifier
+                        .wrapContentWidth()
+                        .wrapContentHeight(),
             )
             Row(
-                modifier = Modifier
-                    .heightIn(max = 100.dp)
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                modifier =
+                    Modifier
+                        .heightIn(max = 100.dp)
+                        .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 val painter = painterResource(R.drawable.coin_heads)
                 Image(
                     painter = painter,
-                    contentDescription = stringResource(
-                        id = R.string.play_game_instructions
-                    ),
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(
-                            weight = painter.intrinsicSize.width / painter.intrinsicSize.height,
-                            fill = false
-                        )
-                        .clickable {
-                            if (onClick(R.string.play_button_flip_heads)) {
-                                Modifier.alpha(1.0f)
-                            } else {
-                                Modifier.alpha(0.3f)
-                            }
-                        }
-                );
+                    contentDescription =
+                        stringResource(
+                            id = R.string.play_game_instructions,
+                        ),
+                    modifier =
+                        Modifier
+                            .fillMaxHeight()
+                            .weight(
+                                weight = painter.intrinsicSize.width / painter.intrinsicSize.height,
+                                fill = false,
+                            )
+                            .clickable {
+                                if (onClick(R.string.play_button_flip_heads)) {
+                                    Modifier.alpha(1.0f)
+                                } else {
+                                    Modifier.alpha(0.3f)
+                                }
+                            },
+                )
                 Image(
                     painter = painterResource(R.drawable.coin_tails),
-                    contentDescription = stringResource(
-                        id = R.string.play_game_instructions
-                    ),
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(
-                            weight = painter.intrinsicSize.width / painter.intrinsicSize.height,
-                            fill = false
-                        )
-                        .clickable {
-                            if (onClick(R.string.play_button_flip_tails)) {
-                                Modifier.alpha(1.0f)
-                            } else {
-                                Modifier.alpha(0.3f)
-                            }
-                        }
+                    contentDescription =
+                        stringResource(
+                            id = R.string.play_game_instructions,
+                        ),
+                    modifier =
+                        Modifier
+                            .fillMaxHeight()
+                            .weight(
+                                weight = painter.intrinsicSize.width / painter.intrinsicSize.height,
+                                fill = false,
+                            )
+                            .clickable {
+                                if (onClick(R.string.play_button_flip_tails)) {
+                                    Modifier.alpha(1.0f)
+                                } else {
+                                    Modifier.alpha(0.3f)
+                                }
+                            },
                 )
             }
-            (activity as MainActivity).AlgorandDivider()
+            (activity as MainActivity).algorandDivider()
             Text(
                 stringResource(R.string.play_game_instructions),
                 color = Color.Black,
-                style = TextStyle(
-                    fontSize = 16.sp
-                ),
+                style =
+                    TextStyle(
+                        fontSize = 16.sp,
+                    ),
                 fontFamily = FontFamily.SansSerif,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight()
-                    .padding(start = 30.dp, end = 30.dp)
+                modifier =
+                    Modifier
+                        .wrapContentWidth()
+                        .wrapContentHeight()
+                        .padding(start = 30.dp, end = 30.dp),
             )
         }
     }
 
+    @Suppress("ComposableNaming")
     @Composable
-    fun PendingViewComposable() {
+    fun pendingViewComposable() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
         ) {
-            ProgressComposable()
-            AlgorandFragmentButton(
+            progressComposable()
+            algorandFragmentButton(
                 resourceId = R.string.play_button_pending,
-                stringResourceId = R.string.play_button_pending
+                stringResourceId = R.string.play_button_pending,
             )
         }
     }
 
+    @Suppress("ComposableNaming")
     @Composable
-    fun SettleViewComposable() {
+    fun settleViewComposable() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
         ) {
-            ProgressComposable()
-            AlgorandFragmentButton(
+            progressComposable()
+            algorandFragmentButton(
                 resourceId = R.string.play_button_settle,
-                stringResourceId = R.string.play_button_settle
+                stringResourceId = R.string.play_button_settle,
             )
         }
     }
 
+    @Suppress("ComposableNaming")
     @Composable
-    fun ProgressComposable() {
+    fun progressComposable() {
         val currentRoundLiveData by playViewModel.currentRoundLiveData.observeAsState()
         val currentRound = currentRoundLiveData
         if (currentRound != null) {
@@ -356,36 +395,41 @@ class PlayFragment : BaseFragment() {
                 stringResource(R.string.play_current_round) + " ${playViewModel.currentRound}",
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
-                style = TextStyle(
-                    fontSize = 24.sp
-                ),
+                style =
+                    TextStyle(
+                        fontSize = 24.sp,
+                    ),
                 fontFamily = FontFamily.SansSerif,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight()
+                modifier =
+                    Modifier
+                        .wrapContentWidth()
+                        .wrapContentHeight(),
             )
             Text(
                 stringResource(R.string.play_waiting_round) + " ${(playViewModel.commitmentRound + 10L)}",
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
-                style = TextStyle(
-                    fontSize = 24.sp
-                ),
+                style =
+                    TextStyle(
+                        fontSize = 24.sp,
+                    ),
                 fontFamily = FontFamily.SansSerif,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight()
+                modifier =
+                    Modifier
+                        .wrapContentWidth()
+                        .wrapContentHeight(),
             )
-            CircularProgressIndicator(progress = playViewModel.calculateProgress(),
+            CircularProgressIndicator(
+                progress = playViewModel.calculateProgress(),
                 backgroundColor = colorResource(R.color.gray_999999),
                 color = colorResource(R.color.teal_700),
                 strokeWidth = 8.dp,
                 strokeCap = StrokeCap.Round,
-                modifier = Modifier.size(size = 100.dp)
+                modifier = Modifier.size(size = 100.dp),
             )
-            (activity as MainActivity).AlgorandDivider()
+            (activity as MainActivity).algorandDivider()
         }
     }
 
@@ -417,8 +461,8 @@ class PlayFragment : BaseFragment() {
                 (activity as MainActivity).showSnackbar(getString(R.string.play_button_submit_bet))
             }
             R.string.play_button_pending -> {
-                //playViewModel.updateGameState()
-                //settle button is not clickable when pending
+                // playViewModel.updateGameState()
+                // settle button is not clickable when pending
             }
             R.string.play_button_settle -> {
                 playViewModel.updateGameState()
@@ -428,7 +472,10 @@ class PlayFragment : BaseFragment() {
         return true
     }
 
-    fun getJsonDataFromAsset(context: Context, fileName: String): String? {
+    fun getJsonDataFromAsset(
+        context: Context,
+        fileName: String,
+    ): String? {
         val jsonString: String
         try {
             jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }

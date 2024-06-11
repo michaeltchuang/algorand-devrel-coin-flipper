@@ -24,43 +24,52 @@ import com.algorand.example.coinflipper.databinding.FragmentAccountBinding
 import com.algorand.example.coinflipper.ui.LoginActivity
 import com.algorand.example.coinflipper.ui.MainActivity
 import com.algorand.example.coinflipper.ui.common.BaseFragment
+import com.algorand.example.coinflipper.ui.common.BaseViewModel
 
 class AccountFragment : BaseFragment() {
-    private val TAG: String = "AccountFragment"
-    private lateinit var accountViewModel: AccountViewModel
+    companion object {
+        private const val TAG: String = "AccountFragment"
+    }
+
+    private lateinit var accountViewModel: BaseViewModel
     private lateinit var binding: FragmentAccountBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         (activity as MainActivity).actionBar?.title = getString(R.string.app_name_long)
 
-        binding = DataBindingUtil.inflate<FragmentAccountBinding>(
-            inflater,
-            R.layout.fragment_account,
-            container,
-            false
-        )
-            .apply {
-                composeFragmentAccount.setContent {
-                    AccountFragmentComposable()
+        binding =
+            DataBindingUtil.inflate<FragmentAccountBinding>(
+                inflater,
+                R.layout.fragment_account,
+                container,
+                false,
+            )
+                .apply {
+                    composeFragmentAccount.setContent {
+                        accountFragmentComposable()
+                    }
                 }
-            }
-        accountViewModel = ViewModelProvider(this).get(AccountViewModel::class.java)
+        accountViewModel = ViewModelProvider(this).get(BaseViewModel::class.java)
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         activity?.getIntent()?.getExtras()?.getString("passphrase")?.apply {
             accountViewModel.recoverAccount(this, true)
         }
     }
 
+    @Suppress("ComposableNaming")
     @Composable
-    fun AccountFragmentComposable() {
+    fun accountFragmentComposable() {
         val account by accountViewModel.accountLiveData.observeAsState()
         if (account == null) {
             Log.d(TAG, "No account detected")
@@ -70,22 +79,26 @@ class AccountFragment : BaseFragment() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .background(Color.White)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .background(Color.White),
         ) {
             (activity as MainActivity)
-            .PassphraseField(
-                getString(R.string.account_address),
-                account?.address.toString()
-            )
+                .passphraseField(
+                    getString(R.string.account_address),
+                    account?.address.toString(),
+                )
             (activity as MainActivity)
-                .PassphraseField(
-                getString(R.string.account_passphrase),
-                account?.toMnemonic().toString())
-            AlgorandFragmentButton(R.string.account_button_lock,
-                    R.string.account_button_lock)
+                .passphraseField(
+                    getString(R.string.account_passphrase),
+                    account?.toMnemonic().toString(),
+                )
+            algorandFragmentButton(
+                R.string.account_button_lock,
+                R.string.account_button_lock,
+            )
         }
     }
 
@@ -100,4 +113,3 @@ class AccountFragment : BaseFragment() {
         return true
     }
 }
-

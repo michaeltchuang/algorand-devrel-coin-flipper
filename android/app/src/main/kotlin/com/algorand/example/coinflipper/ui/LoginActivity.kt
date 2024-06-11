@@ -40,14 +40,16 @@ import com.algorand.example.coinflipper.R
 import com.algorand.example.coinflipper.databinding.ActivityLoginBinding
 import com.algorand.example.coinflipper.ui.common.BaseActivity
 import com.algorand.example.coinflipper.ui.login.LoginViewModel
-import com.algorand.example.coinflipper.utils.Constants
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
 class LoginActivity : BaseActivity() {
-    private val TAG = "LoginActivity"
+    companion object {
+        private const val TAG = "LoginActivity"
+    }
+
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: ActivityLoginBinding
 
@@ -56,23 +58,26 @@ class LoginActivity : BaseActivity() {
 
         supportActionBar?.title = getString(R.string.app_name_long)
 
-        binding = DataBindingUtil.setContentView<ActivityLoginBinding?>(this, R.layout.activity_login)
-            .apply {
-                composeActivityLogin.setContent {
-                    LoginActivityComposable()
+        binding =
+            DataBindingUtil.setContentView<ActivityLoginBinding?>(this, R.layout.activity_login)
+                .apply {
+                    composeActivityLogin.setContent {
+                        loginActivityComposable()
+                    }
                 }
-            }
-        loginViewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        ).get(LoginViewModel::class.java)
+        loginViewModel =
+            ViewModelProvider(
+                this,
+                ViewModelProvider.AndroidViewModelFactory(application),
+            ).get(LoginViewModel::class.java)
         Security.removeProvider("BC")
         Security.insertProviderAt(BouncyCastleProvider(), 0)
     }
 
     @Preview
+    @Suppress("ComposableNaming")
     @Composable
-    fun LoginActivityComposable() {
+    fun loginActivityComposable() {
         val label = getString(R.string.login_restore_textifield_title)
         val dataInput = getString(R.string.login_restore_textfield_value)
         passphraseTextField = dataInput
@@ -80,55 +85,63 @@ class LoginActivity : BaseActivity() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
         ) {
             Text(
                 stringResource(R.string.login_guest_message),
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
-                style = TextStyle(
-                    fontSize = 24.sp
-                ),
+                style =
+                    TextStyle(
+                        fontSize = 24.sp,
+                    ),
                 fontFamily = FontFamily.SansSerif,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .width(282.dp)
-                    .wrapContentHeight()
+                modifier =
+                    Modifier
+                        .width(282.dp)
+                        .wrapContentHeight(),
             )
             Image(
                 painter = painterResource(id = R.drawable.coin_heads),
                 contentDescription = stringResource(id = R.string.login_guest_message),
-                modifier = Modifier
-                    .wrapContentSize()
-                    .wrapContentHeight()
-                    .wrapContentWidth()
-                    .size(100.dp)
+                modifier =
+                    Modifier
+                        .wrapContentSize()
+                        .wrapContentHeight()
+                        .wrapContentWidth()
+                        .size(100.dp),
             )
-            AlgorandDivider()
-            AlgorandButton(resourceId = R.string.login_button_create,
-                stringResourceId = R.string.login_button_create)
-            AlgorandDivider()
-            PassphraseField(label, dataInput)
-            AlgorandButton(resourceId = R.string.login_button_restore,
-                stringResourceId = R.string.login_button_restore)
-            AlgorandDivider()
+            algorandDivider()
+            algorandButton(
+                resourceId = R.string.login_button_create,
+                stringResourceId = R.string.login_button_create,
+            )
+            algorandDivider()
+            passphraseField(label, dataInput)
+            algorandButton(
+                resourceId = R.string.login_button_restore,
+                stringResourceId = R.string.login_button_restore,
+            )
+            algorandDivider()
             Text(
                 stringResource(R.string.login_disclaimer),
                 color = Color.Black,
                 fontFamily = FontFamily.SansSerif,
                 textAlign = TextAlign.Center,
-
-                modifier = Modifier
-                    .width(262.dp)
-                    .wrapContentHeight()
-                    .alpha(0.6F)
+                modifier =
+                    Modifier
+                        .width(262.dp)
+                        .wrapContentHeight()
+                        .alpha(0.6F),
             )
         }
     }
 
-    override fun onClick(resourceId: Int) : Boolean {
+    override fun onClick(resourceId: Int): Boolean {
         when (resourceId) {
             R.string.login_button_create -> {
                 loginViewModel.accountLiveData.observe(this) {
@@ -168,8 +181,7 @@ class LoginActivity : BaseActivity() {
                         finish()
                     }
                 }
-                //loginViewModel.recoverAccount(passphraseTextField)
-                loginViewModel.recoverAccount(Constants.TEST_PASSPHRASE, false)
+                loginViewModel.recoverAccount(passphraseTextField, true)
             }
         }
         return true
@@ -180,12 +192,12 @@ class LoginActivity : BaseActivity() {
             Snackbar.make(
                 binding.root,
                 str,
-                Snackbar.LENGTH_LONG
+                Snackbar.LENGTH_LONG,
             )
         val layoutParams = ActionBar.LayoutParams(snackbar.view.layoutParams)
-        layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT;
+        layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT
         layoutParams.gravity = Gravity.CENTER or Gravity.CENTER_HORIZONTAL
-        layoutParams.setMargins(50, 100, 50, 0);
+        layoutParams.setMargins(50, 100, 50, 0)
         snackbar.view.layoutParams = layoutParams
         snackbar.setBackgroundTint(getColor(R.color.gray_333333))
         snackbar.setTextColor(getColor(R.color.white))
@@ -201,4 +213,3 @@ class LoginActivity : BaseActivity() {
         snackbar.show()
     }
 }
-

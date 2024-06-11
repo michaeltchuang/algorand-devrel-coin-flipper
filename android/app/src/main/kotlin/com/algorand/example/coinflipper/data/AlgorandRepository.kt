@@ -25,22 +25,26 @@ import java.util.function.Consumer
 import com.algorand.algosdk.v2.client.model.Account as AccountInfo
 
 class AlgorandRepository() {
-    private val TAG: String = "AlgorandRepository"
-    private var client: AlgodClient = AlgodClient(
-        Constants.ALGOD_API_ADDR,
-        Constants.ALGOD_PORT,
-        Constants.ALGOD_API_TOKEN,
-        Constants.ALGOD_API_TOKEN_KEY
-    )
+    companion object {
+        private const val TAG: String = "AlgorandRepository"
+    }
+
+    private var client: AlgodClient =
+        AlgodClient(
+            Constants.ALGOD_API_ADDR,
+            Constants.ALGOD_PORT,
+            Constants.ALGOD_API_TOKEN,
+            Constants.ALGOD_API_TOKEN_KEY,
+        )
 
     val txHeaders = arrayOf("Content-Type")
     val txValues = arrayOf("application/x-binary")
 
-    fun generateAlgodPair() : Account {
+    fun generateAlgodPair(): Account {
         return Account()
     }
 
-    fun recoverAccount(passPhrase : String) : Account? {
+    fun recoverAccount(passPhrase: String): Account? {
         try {
             return Account(passPhrase)
         } catch (e: Exception) {
@@ -48,7 +52,7 @@ class AlgorandRepository() {
         }
     }
 
-    suspend fun getAccountInfo(account:  Account) : AccountInfo? {
+    suspend fun getAccountInfo(account: Account): AccountInfo? {
         return withContext(Dispatchers.IO) {
             try {
                 val respAcct = client.AccountInformation(account.getAddress()).execute()
@@ -62,7 +66,10 @@ class AlgorandRepository() {
         }
     }
 
-    suspend fun appOptIn(account: Account, appId: Long) : PendingTransactionResponse? {
+    suspend fun appOptIn(
+        account: Account,
+        appId: Long,
+    ): PendingTransactionResponse? {
         return withContext(Dispatchers.IO) {
             try {
                 // define sender as creator
@@ -71,11 +78,12 @@ class AlgorandRepository() {
                     client.TransactionParams().execute().body()
 
                 // create unsigned transaction
-                val txn: Transaction = Transaction.ApplicationOptInTransactionBuilder()
-                    .sender(sender)
-                    .suggestedParams(params)
-                    .applicationId(appId)
-                    .build()
+                val txn: Transaction =
+                    Transaction.ApplicationOptInTransactionBuilder()
+                        .sender(sender)
+                        .suggestedParams(params)
+                        .applicationId(appId)
+                        .build()
 
                 // sign transaction
                 val signedTxn: SignedTransaction = account.signTransaction(txn)
@@ -98,7 +106,10 @@ class AlgorandRepository() {
         }
     }
 
-    suspend fun closeOutApp(account: Account, appId: Long) : PendingTransactionResponse? {
+    suspend fun closeOutApp(
+        account: Account,
+        appId: Long,
+    ): PendingTransactionResponse? {
         return withContext(Dispatchers.IO) {
             try {
                 // define sender as creator
@@ -107,11 +118,12 @@ class AlgorandRepository() {
                     client.TransactionParams().execute().body()
 
                 // create unsigned transaction
-                val txn: Transaction = Transaction.ApplicationCloseTransactionBuilder()
-                    .sender(sender)
-                    .suggestedParams(params)
-                    .applicationId(appId)
-                    .build()
+                val txn: Transaction =
+                    Transaction.ApplicationCloseTransactionBuilder()
+                        .sender(sender)
+                        .suggestedParams(params)
+                        .applicationId(appId)
+                        .build()
 
                 // sign transaction
                 val signedTxn: SignedTransaction = account.signTransaction(txn)
@@ -134,13 +146,16 @@ class AlgorandRepository() {
         }
     }
 
-    suspend fun getCurrentRound(account: Account, appId: Long) : Long {
+    suspend fun getCurrentRound(
+        account: Account,
+        appId: Long,
+    ): Long {
         return withContext(Dispatchers.IO) {
             try {
                 val params: TransactionParametersResponse =
                     client.TransactionParams().execute().body()
                         ?: client.TransactionParams().execute().body() ?: client.TransactionParams()
-                            .execute().body()
+                        .execute().body()
                 params.lastRound
             } catch (e: Exception) {
                 0L
@@ -148,7 +163,11 @@ class AlgorandRepository() {
         }
     }
 
-    suspend fun createTransactionWithSigner(account: Account, appId: Long, amount: Int) : TransactionWithSigner? {
+    private suspend fun createTransactionWithSigner(
+        account: Account,
+        appId: Long,
+        amount: Int,
+    ): TransactionWithSigner? {
         return withContext(Dispatchers.IO) {
             try {
                 // Get suggested params from client
@@ -157,12 +176,13 @@ class AlgorandRepository() {
                 val sp: TransactionParametersResponse = rsp.body() ?: rsp.body() ?: rsp.body()
 
                 // Create a transaction
-                val ptxn = PaymentTransactionBuilder.Builder()
-                    .suggestedParams(sp)
-                    .amount(amount)
-                    .sender(account.address)
-                    .receiver(Address.forApplication(appId))
-                    .build()
+                val ptxn =
+                    PaymentTransactionBuilder.Builder()
+                        .suggestedParams(sp)
+                        .amount(amount)
+                        .sender(account.address)
+                        .receiver(Address.forApplication(appId))
+                        .build()
 
                 // Construct TransactionWithSigner
                 val tws = TransactionWithSigner(ptxn, account.transactionSigner)
@@ -174,7 +194,13 @@ class AlgorandRepository() {
         }
     }
 
-    suspend fun appFlipCoin(account: Account, appId: Long, contractStr: String, amount: Int, isHeads: Boolean) : AtomicTransactionComposer.ExecuteResult? {
+    suspend fun appFlipCoin(
+        account: Account,
+        appId: Long,
+        contractStr: String,
+        amount: Int,
+        isHeads: Boolean,
+    ): AtomicTransactionComposer.ExecuteResult? {
         return withContext(Dispatchers.IO) {
             try {
                 val contract: Contract = Encoder.decodeFromJson(contractStr, Contract::class.java)
@@ -182,7 +208,7 @@ class AlgorandRepository() {
                 val rsp = client.TransactionParams().execute()
                 val tsp: TransactionParametersResponse = rsp.body()
                 val tws = createTransactionWithSigner(account, appId, amount)
-                val method_args = listOf(tws, isHeads)
+                val methodArgs = listOf(tws, isHeads)
 
                 // create methodCallParams by builder (or create by constructor) for add method
                 val mctb = MethodCallTransactionBuilder.Builder()
@@ -191,20 +217,22 @@ class AlgorandRepository() {
                 mctb.signer(account.transactionSigner)
                 mctb.suggestedParams(tsp)
                 mctb.method(contract.getMethodByName("flip_coin"))
-                mctb.methodArguments(method_args)
+                mctb.methodArguments(methodArgs)
                 mctb.onComplete(Transaction.OnCompletion.NoOpOC)
 
                 val atc = AtomicTransactionComposer()
-                //atc.addTransaction(tws);
+                // atc.addTransaction(tws);
                 atc.addMethodCall(mctb.build())
                 val res = atc.execute(client, 100)
 
-                res.methodResults.forEach(Consumer<ReturnValue> { methodResult: ReturnValue? ->
-                    Log.d(
-                        TAG,
-                        methodResult.toString()
-                    )
-                })
+                res.methodResults.forEach(
+                    Consumer<ReturnValue> { methodResult: ReturnValue? ->
+                        Log.d(
+                            TAG,
+                            methodResult.toString(),
+                        )
+                    },
+                )
 
                 Log.d(TAG, "flip coin call success for app-id: $appId")
                 res
@@ -215,14 +243,19 @@ class AlgorandRepository() {
         }
     }
 
-    suspend fun appSettleBet(account: Account, appId: Long, contractStr: String, randomBeaconApp: BigInteger) : AtomicTransactionComposer.ExecuteResult? {
+    suspend fun appSettleBet(
+        account: Account,
+        appId: Long,
+        contractStr: String,
+        randomBeaconApp: BigInteger,
+    ): AtomicTransactionComposer.ExecuteResult? {
         return withContext(Dispatchers.IO) {
             try {
                 val contract: Contract = Encoder.decodeFromJson(contractStr, Contract::class.java)
 
                 val rsp = client.TransactionParams().execute()
                 val tsp: TransactionParametersResponse = rsp.body()
-                val method_args = listOf(account.address, randomBeaconApp)
+                val methodArgs = listOf(account.address, randomBeaconApp)
 
                 // create methodCallParams by builder (or create by constructor) for add method
                 val mctb = MethodCallTransactionBuilder.Builder()
@@ -231,20 +264,22 @@ class AlgorandRepository() {
                 mctb.signer(account.transactionSigner)
                 mctb.suggestedParams(tsp)
                 mctb.method(contract.getMethodByName("settle"))
-                mctb.methodArguments(method_args)
+                mctb.methodArguments(methodArgs)
                 mctb.onComplete(Transaction.OnCompletion.NoOpOC)
 
                 val atc = AtomicTransactionComposer()
-                //atc.addTransaction(tws);
+                // atc.addTransaction(tws);
                 atc.addMethodCall(mctb.build())
 
                 val res = atc.execute(client, 100)
-                res.methodResults.forEach(Consumer<ReturnValue> { methodResult: ReturnValue? ->
-                    Log.d(
-                        TAG,
-                        methodResult.toString()
-                    )
-                })
+                res.methodResults.forEach(
+                    Consumer<ReturnValue> { methodResult: ReturnValue? ->
+                        Log.d(
+                            TAG,
+                            methodResult.toString(),
+                        )
+                    },
+                )
                 Log.d(TAG, "flip coin call success for app-id: $appId")
                 res
             } catch (e: Exception) {

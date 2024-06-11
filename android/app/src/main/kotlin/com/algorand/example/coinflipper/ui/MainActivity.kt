@@ -19,7 +19,6 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : BaseActivity() {
-
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,12 +31,13 @@ class MainActivity : BaseActivity() {
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         val navController = navHostFragment.navController
         val bottomNavigation: BottomNavigationView = findViewById(R.id.bottom_nav_main)
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navigation_play,
-                R.id.navigation_account
+        val appBarConfiguration =
+            AppBarConfiguration(
+                setOf(
+                    R.id.navigation_play,
+                    R.id.navigation_account,
+                ),
             )
-        )
         setupActionBarWithNavController(navController, appBarConfiguration)
         bottomNavigation.setupWithNavController(navController)
         bottomNavigation.setOnItemSelectedListener { item ->
@@ -60,12 +60,12 @@ class MainActivity : BaseActivity() {
             Snackbar.make(
                 binding.root,
                 str,
-                Snackbar.LENGTH_LONG
+                Snackbar.LENGTH_LONG,
             )
         val layoutParams = ActionBar.LayoutParams(snackbar.view.layoutParams)
-        layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT;
+        layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT
         layoutParams.gravity = Gravity.CENTER or Gravity.CENTER_HORIZONTAL
-        layoutParams.setMargins(50, 100, 50, 0);
+        layoutParams.setMargins(50, 100, 50, 0)
         snackbar.view.layoutParams = layoutParams
         snackbar.setBackgroundTint(getColor(R.color.gray_333333))
         snackbar.setTextColor(getColor(R.color.white))
