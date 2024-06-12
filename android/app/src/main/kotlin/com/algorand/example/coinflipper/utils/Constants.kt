@@ -6,9 +6,7 @@ object Constants {
     const val ALGOD_API_TOKEN_KEY = "X-API-Key"
     const val ALGOD_API_TOKEN = ""
     const val RANDOM_BEACON_APPID = 600011887L
-    const val COINFLIP_APP_ID_TESTNET = 115885218L // Coinflip
-
-    // const val COINFLIP_APP_ID_TESTNET = 673404372L // Reti
+    const val COINFLIP_APP_ID_TESTNET = 680099143L
     const val TEST_ADDRESS = "FPH5SP6GXUA2CMLCMYVWWJJCTQXCNPKRR3QCAMBCQD3ILIV7FR27UIOL7M"
     const val TEST_PASSPHRASE_PART1 = "finish enact garden isolate pottery dizzy pool heavy moral gloom tent useless"
     const val TEST_PASSPHRASE_PART2 = "galaxy present pledge diary lava wisdom clarify right salute scout famous ability honey"
